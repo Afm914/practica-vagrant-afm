@@ -1,9 +1,20 @@
-N = "99" # Tu número de clase
-iniciales = "TUS-INICIALES"
+N = "3" # Tu número de clase
+iniciales = "AFM"
 
 Vagrant.configure("2") do |config|
+  # 1. Evitar que vagrant-vbguest intente instalar headers antes del aprovisionamiento
+  if Vagrant.has_plugin?("vagrant-vbguest")
+    config.vbguest.auto_update = false
+  end
 
-# Definición del equipo gw
+  # 2. Configuración global de VirtualBox para Arch Linux (DNS limpio y controlador estable)
+  config.vm.provider "virtualbox" do |vb|
+    vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+    vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+    vb.customize ["modifyvm", :id, "--graphicscontroller", "vboxsvga"]
+  end
+
+  # Definición del equipo gw
   config.vm.define "gw" do |gw|
     gw.vm.box = "bento/ubuntu-24.04"
     gw.vm.hostname = "gw-#{iniciales}"
@@ -13,6 +24,21 @@ Vagrant.configure("2") do |config|
     gw.vm.network "private_network", ip: "172.1.#{N}.1", netmask: "255.255.255.0", virtualbox__intnet: "red_dmz" 
     # eth3: LAN
     gw.vm.network "private_network", ip: "172.2.#{N}.1", netmask: "255.255.255.0", virtualbox__intnet: "red_lan"
+
+    # Preparación de apt, needrestart y headers
+    gw.vm.provision "shell", inline: <<-SHELL
+      set -e
+      # Silenciar needrestart en modo automático
+      if [ -f /etc/needrestart/needrestart.conf ]; then
+        sed -i 's/#$nrconf{restart} = .*/$nrconf{restart} = "a";/' /etc/needrestart/needrestart.conf
+      fi
+
+      apt-get clean
+      rm -rf /var/lib/apt/lists/*
+      apt-get update -y
+      DEBIAN_FRONTEND=noninteractive apt-get install -y linux-headers-generic build-essential dkms
+    SHELL
+
     gw.vm.provision "shell", path: "gw/provision.sh"   
     gw.vm.provider "virtualbox" do |vb|
         vb.name = "gw"
@@ -24,17 +50,26 @@ Vagrant.configure("2") do |config|
     end
   end        
   
-  
   # IDP en la LAN
   config.vm.define "idp" do |idp|
     idp.vm.box = "bento/ubuntu-24.04"
     idp.vm.hostname = "idp-#{iniciales}"
     idp.vm.network "private_network", ip: "172.2.#{N}.2", netmask: "255.255.255.0", virtualbox__intnet: "red_lan"
+    
+    idp.vm.provision "shell", inline: <<-SHELL
+      if [ -f /etc/needrestart/needrestart.conf ]; then
+        sed -i 's/#$nrconf{restart} = .*/$nrconf{restart} = "a";/' /etc/needrestart/needrestart.conf
+      fi
+      apt-get clean
+      rm -rf /var/lib/apt/lists/*
+      apt-get update -y
+    SHELL
+
     idp.vm.provision "shell", path: "idp/provision.sh"
     # eliminar default gw en eth0 – red NAT creada por defecto
     idp.vm.provision "shell",
         run: "always",
-        inline:  "ip route del default && ip route add default via 172.2.#{N}.1"       
+        inline: "ip route del default && ip route add default via 172.2.#{N}.1"       
     idp.vm.provider "virtualbox" do |vb|
         vb.name = "idp-lan"
         vb.gui = false
@@ -54,7 +89,7 @@ Vagrant.configure("2") do |config|
     # eliminar default gw en eth0 – red NAT creada por defecto
     adminpc.vm.provision "shell",
         run: "always",
-        inline:  "ip route del default && ip route add default via 172.2.#{N}.1"   
+        inline: "ip route del default && ip route add default via 172.2.#{N}.1"   
     adminpc.vm.provider "virtualbox" do |vb|
         vb.name = "adminpc-lan"
         vb.gui = false
@@ -74,7 +109,7 @@ Vagrant.configure("2") do |config|
     # eliminar default gw en eth0 – red NAT creada por defecto
     empleado.vm.provision "shell",
         run: "always",
-        inline:  "ip route del default && ip route add default via 172.2.#{N}.1"   
+        inline: "ip route del default && ip route add default via 172.2.#{N}.1"   
     empleado.vm.provider "virtualbox" do |vb|
         vb.name = "empleado-lan"
         vb.gui = false
@@ -90,11 +125,21 @@ Vagrant.configure("2") do |config|
     proxy.vm.box = "bento/ubuntu-24.04"
     proxy.vm.hostname = "proxy-#{iniciales}"
     proxy.vm.network "private_network", ip: "172.1.#{N}.2", netmask: "255.255.255.0", virtualbox__intnet: "red_dmz" 
+    
+    proxy.vm.provision "shell", inline: <<-SHELL
+      if [ -f /etc/needrestart/needrestart.conf ]; then
+        sed -i 's/#$nrconf{restart} = .*/$nrconf{restart} = "a";/' /etc/needrestart/needrestart.conf
+      fi
+      apt-get clean
+      rm -rf /var/lib/apt/lists/*
+      apt-get update -y
+    SHELL
+
     proxy.vm.provision "shell", path: "proxy/provision.sh"
     # eliminar default gw en eth0 – red NAT creada por defecto
     proxy.vm.provision "shell",
         run: "always",
-        inline:  "ip route del default && ip route add default via 172.1.#{N}.1"       
+        inline: "ip route del default && ip route add default via 172.1.#{N}.1"       
     proxy.vm.provider "virtualbox" do |vb|
         vb.name = "proxy-dmz"
         vb.gui = false
@@ -114,7 +159,7 @@ Vagrant.configure("2") do |config|
     # eliminar default gw en eth0 – red NAT creada por defecto
     www.vm.provision "shell",
         run: "always",
-        inline:  "ip route del default && ip route add default via 172.1.#{N}.1"     
+        inline: "ip route del default && ip route add default via 172.1.#{N}.1"     
     www.vm.provider "virtualbox" do |vb|
         vb.name = "www-dmz"
         vb.gui = false
@@ -125,4 +170,3 @@ Vagrant.configure("2") do |config|
     end
   end
 end
-
