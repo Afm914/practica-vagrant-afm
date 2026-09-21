@@ -22,9 +22,10 @@ Vagrant.configure("2") do |config|
     gw.vm.network "private_network", ip: "203.0.113.254", netmask: "255.255.255.0", virtualbox__intnet: "red_wan"
     # eth2: DMZ
     gw.vm.network "private_network", ip: "172.1.#{N}.1", netmask: "255.255.255.0", virtualbox__intnet: "red_dmz" 
-    # eth3: LAN
+    # eth3: LAN de empleados
     gw.vm.network "private_network", ip: "172.2.#{N}.1", netmask: "255.255.255.0", virtualbox__intnet: "red_lan"
-
+    #eth4: LAN de gestion o intranet
+    gw.vm.network "private_network", ip: "172.3.#{N}.1", netmask: "255.255.255.0", virtualbox__intnet: "red_gestion"
     # Preparación de apt, needrestart y headers
     gw.vm.provision "shell", inline: <<-SHELL
       set -e
@@ -54,7 +55,7 @@ Vagrant.configure("2") do |config|
   config.vm.define "idp" do |idp|
     idp.vm.box = "bento/ubuntu-24.04"
     idp.vm.hostname = "idp-#{iniciales}"
-    idp.vm.network "private_network", ip: "172.2.#{N}.2", netmask: "255.255.255.0", virtualbox__intnet: "red_lan"
+    idp.vm.network "private_network", ip: "172.3.#{N}.2", netmask: "255.255.255.0", virtualbox__intnet: "red_gestion"
     
     idp.vm.provision "shell", inline: <<-SHELL
       if [ -f /etc/needrestart/needrestart.conf ]; then
@@ -69,9 +70,9 @@ Vagrant.configure("2") do |config|
     # eliminar default gw en eth0 – red NAT creada por defecto
     idp.vm.provision "shell",
         run: "always",
-        inline: "ip route del default && ip route add default via 172.2.#{N}.1"       
+        inline: "ip route del default && ip route add default via 172.3.#{N}.1"       
     idp.vm.provider "virtualbox" do |vb|
-        vb.name = "idp-lan"
+        vb.name = "idp-intranet"
         vb.gui = false
         vb.memory = "512"
         vb.cpus = 1
@@ -79,7 +80,7 @@ Vagrant.configure("2") do |config|
         vb.customize ["modifyvm", :id, "--groups", "/sad"]
     end
   end
-
+  
   # Adminpc en la LAN
   config.vm.define "adminpc" do |adminpc|
     adminpc.vm.box = "generic/alpine319"
