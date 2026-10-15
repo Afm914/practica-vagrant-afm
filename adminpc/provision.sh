@@ -8,5 +8,5 @@ echo "########################################"
 echo "-----------------"
 echo "Actualizando repositorios"
 apk update
-apk add curl nmap tcpdump wget bash iputils
+apk add nano curl nmap tcpdump wget bash iputils
 echo "------ FIN ------"
