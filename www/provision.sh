@@ -81,4 +81,24 @@ rc-update add php-fpm81 default
 rc-service php-fpm81 restart
 rc-service nginx restart
 
+echo "=> Blindando acceso SSH en WWW..."
+# Crear el usuario (Alpine)
+apk add sudo
+adduser -D admin_alex
+passwd -u admin_alex
+adduser admin_alex wheel
+echo "%wheel ALL=(ALL) ALL" > /etc/sudoers.d/wheel
+
+# Copiamos la clave autorizada inyectada por Vagrant en /tmp
+mkdir -p /home/admin_alex/.ssh
+cat /tmp/id_ed25519.pub >> /home/admin_alex/.ssh/authorized_keys
+chown -R admin_alex:admin_alex /home/admin_alex/.ssh
+chmod 700 /home/admin_alex/.ssh
+chmod 600 /home/admin_alex/.ssh/authorized_keys
+
+# Hardening de sshd
+sed -i 's/^.*PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config
+sed -i 's/^.*PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
+rc-service sshd restart
+
 echo "------ FIN ------"
