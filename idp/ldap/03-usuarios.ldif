@@ -1,0 +1,29 @@
+# Administrador de sistemas (tú)
+dn: uid=alex.fm,ou=usuarios,dc=afm,dc=internal
+objectClass: inetOrgPerson
+objectClass: posixAccount
+uid: alex.fm
+cn: Alex FM
+sn: FM
+givenName: Alex
+mail: alex.fm@afm.internal
+uidNumber: 10001
+gidNumber: 10000
+homeDirectory: /home/alex.fm
+loginShell: /bin/bash
+userPassword: {SSHA}X32L4tVvpI0SbJMn2+iQSJSJ74vcIfnR
+
+# Empleado
+dn: uid=pepe.perez,ou=usuarios,dc=afm,dc=internal
+objectClass: inetOrgPerson
+objectClass: posixAccount
+uid: pepe.perez
+cn: Pepe Perez
+sn: Perez
+givenName: Pepe
+mail: pepe.perez@afm.internal
+uidNumber: 10002
+gidNumber: 10000
+homeDirectory: /home/pepe.perez
+loginShell: /bin/bash
+userPassword: {SSHA}8q70rCmxHS+jRlv34vebEvb0iZOZn9gf
