@@ -1,0 +1,87 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number:
+            55:a0:b1:39:a5:e0:9c:fd:fd:9c:dd:f1:ff:53:09:70
+        Signature Algorithm: sha256WithRSAEncryption
+        Issuer: CN=CA Empresa afm
+        Validity
+            Not Before: Nov 12 11:27:03 2026 GMT
+            Not After : Feb 14 11:27:03 2029 GMT
+        Subject: CN=idp-afm
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                Public-Key: (2048 bit)
+                Modulus:
+                    00:e1:b0:46:c4:b1:ea:b4:b8:92:1e:2a:49:76:02:
+                    83:57:7b:b8:a9:af:46:eb:0f:e6:5a:77:25:9f:e6:
+                    55:16:8e:37:f8:f9:34:e0:80:db:78:c6:17:40:c6:
+                    5e:b4:e1:e6:e2:39:54:1d:1f:86:fa:07:d2:85:91:
+                    16:c1:b0:52:17:c2:00:d8:64:79:84:6d:b9:d6:7c:
+                    10:9c:42:f2:c8:41:05:a2:15:4b:7a:7f:54:09:6e:
+                    2d:75:fe:a8:b8:43:c9:84:08:9f:6c:ff:5a:f6:a8:
+                    f0:57:41:2a:92:cc:63:5c:a5:7f:01:ea:64:d9:fd:
+                    e4:0a:aa:5f:5a:d2:d6:f8:69:61:02:db:7d:27:8a:
+                    f9:01:b0:a5:36:03:56:6b:83:5b:a9:32:98:0a:9a:
+                    a3:e7:08:84:b6:2a:30:48:45:83:86:7c:da:b5:60:
+                    7d:f3:c6:c0:46:ae:11:d0:48:75:75:6e:20:03:22:
+                    ba:01:80:17:59:67:75:c4:c3:cf:00:db:b0:97:8f:
+                    12:c7:64:0a:0b:25:dc:13:95:39:38:c6:d0:dc:71:
+                    1d:b6:c7:58:2d:ee:b1:f9:25:9e:c2:dd:a7:32:9d:
+                    82:34:c0:c3:10:50:b3:60:ef:07:49:28:8a:38:39:
+                    c5:be:74:33:e8:0c:15:1a:48:c5:53:9f:24:81:3e:
+                    e8:35
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            X509v3 Basic Constraints: 
+                CA:FALSE
+            X509v3 Subject Key Identifier: 
+                69:53:97:CD:06:DF:C8:A7:C1:DD:9E:6C:EF:A2:19:5B:35:5A:76:8F
+            X509v3 Authority Key Identifier: 
+                keyid:B0:A1:5B:14:6E:A0:E5:83:04:6F:C5:F8:B6:32:B5:34:84:DD:B4:01
+                DirName:/CN=CA Empresa afm
+                serial:19:75:80:93:EE:72:BB:95:CE:98:D9:63:A3:FF:89:28:83:28:B0:A8
+            X509v3 Extended Key Usage: 
+                TLS Web Server Authentication
+            X509v3 Key Usage: 
+                Digital Signature, Key Encipherment
+            X509v3 Subject Alternative Name: 
+                IP Address:172.3.3.2, DNS:idp-afm
+    Signature Algorithm: sha256WithRSAEncryption
+    Signature Value:
+        1c:ce:3a:5e:d0:bf:25:9f:39:78:bd:45:be:2f:c2:6c:c3:5f:
+        b9:78:d1:50:e2:30:a0:d4:ec:d7:eb:66:50:5f:2c:94:d9:14:
+        0f:4d:09:b5:06:0f:c3:ae:9d:39:dd:6b:68:e3:3d:32:2a:87:
+        63:4d:58:25:9c:9e:d9:0b:03:1d:d2:bd:97:e5:c2:84:4d:ba:
+        07:06:26:99:64:64:44:be:c0:a0:da:85:85:1c:75:dc:20:56:
+        b3:d7:1b:a5:70:9e:02:e1:87:c5:b1:ca:09:5a:f4:21:55:19:
+        4d:9e:35:8c:1e:a1:0f:1a:75:33:43:16:06:6d:73:21:5e:db:
+        e7:ef:fd:ab:86:07:21:93:5b:ca:dd:a0:69:c8:40:0e:3c:ad:
+        ee:66:6a:d2:82:c2:4d:b5:8c:f0:1d:08:77:d9:3d:2d:63:c6:
+        0a:74:9e:a8:20:54:b3:3a:e9:8d:d8:44:cb:ba:cf:bc:6f:21:
+        9e:98:75:4a:20:da:74:ec:2f:c3:c1:b5:cb:70:ea:27:14:cd:
+        ed:9a:75:d6:e9:c0:72:dc:d3:72:4f:c2:6f:b7:7e:ea:15:8f:
+        1e:c4:95:bc:3a:c3:41:27:06:82:21:77:60:28:8f:c7:19:31:
+        54:bd:92:5e:47:71:d8:c9:1e:e2:78:32:f8:9c:75:7c:00:62:
+        51:02:e3:dd
+-----BEGIN CERTIFICATE-----
+MIIDdTCCAl2gAwIBAgIQVaCxOaXgnP39nN3x/1MJcDANBgkqhkiG9w0BAQsFADAZ
+MRcwFQYDVQQDDA5DQSBFbXByZXNhIGFmbTAeFw0yNjExMTIxMTI3MDNaFw0yOTAy
+MTQxMTI3MDNaMBIxEDAOBgNVBAMMB2lkcC1hZm0wggEiMA0GCSqGSIb3DQEBAQUA
+A4IBDwAwggEKAoIBAQDhsEbEseq0uJIeKkl2AoNXe7ipr0brD+ZadyWf5lUWjjf4
++TTggNt4xhdAxl604ebiOVQdH4b6B9KFkRbBsFIXwgDYZHmEbbnWfBCcQvLIQQWi
+FUt6f1QJbi11/qi4Q8mECJ9s/1r2qPBXQSqSzGNcpX8B6mTZ/eQKql9a0tb4aWEC
+230nivkBsKU2A1Zrg1upMpgKmqPnCIS2KjBIRYOGfNq1YH3zxsBGrhHQSHV1biAD
+IroBgBdZZ3XEw88A27CXjxLHZAoLJdwTlTk4xtDccR22x1gt7rH5JZ7C3acynYI0
+wMMQULNg7wdJKIo4OcW+dDPoDBUaSMVTnySBPug1AgMBAAGjgb8wgbwwCQYDVR0T
+BAIwADAdBgNVHQ4EFgQUaVOXzQbfyKfB3Z5s76IZWzVado8wVAYDVR0jBE0wS4AU
+sKFbFG6g5YMEb8X4tjK1NITdtAGhHaQbMBkxFzAVBgNVBAMMDkNBIEVtcHJlc2Eg
+YWZtghQZdYCT7nK7lc6Y2WOj/4kogyiwqDATBgNVHSUEDDAKBggrBgEFBQcDATAL
+BgNVHQ8EBAMCBaAwGAYDVR0RBBEwD4cErAMDAoIHaWRwLWFmbTANBgkqhkiG9w0B
+AQsFAAOCAQEAHM46XtC/JZ85eL1Fvi/CbMNfuXjRUOIwoNTs1+tmUF8slNkUD00J
+tQYPw66dOd1raOM9MiqHY01YJZye2QsDHdK9l+XChE26BwYmmWRkRL7AoNqFhRx1
+3CBWs9cbpXCeAuGHxbHKCVr0IVUZTZ41jB6hDxp1M0MWBm1zIV7b5+/9q4YHIZNb
+yt2gachADjyt7mZq0oLCTbWM8B0Id9k9LWPGCnSeqCBUszrpjdhEy7rPvG8hnph1
+SiDadOwvw8G1y3DqJxTN7Zp11unActzTck/Cb7d+6hWPHsSVvDrDQScGgiF3YCiP
+xxkxVL2SXkdx2Mke4ngy+Jx1fABiUQLj3Q==
+-----END CERTIFICATE-----

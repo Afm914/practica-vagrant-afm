@@ -11,7 +11,7 @@ uidNumber: 10001
 gidNumber: 10000
 homeDirectory: /home/alex.fm
 loginShell: /bin/bash
-userPassword: {SSHA}X32L4tVvpI0SbJMn2+iQSJSJ74vcIfnR
+userPassword: {SSHA}XcFx7DqUjVSxxe6CfVvp+O13vO2OIn6X
 
 # Empleado
 dn: uid=pepe.perez,ou=usuarios,dc=afm,dc=internal
@@ -26,4 +26,4 @@ uidNumber: 10002
 gidNumber: 10000
 homeDirectory: /home/pepe.perez
 loginShell: /bin/bash
-userPassword: {SSHA}8q70rCmxHS+jRlv34vebEvb0iZOZn9gf
+userPassword: {SSHA}aPH11I8MRhPlhYuI+5faNaPa8zuOgXAK
