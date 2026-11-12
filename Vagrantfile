@@ -1,13 +1,22 @@
 N = "3" # Tu número de clase
 iniciales = "AFM"
 
+# Secretos (contraseñas): se leen del fichero .env, que NO se sube a Git
+secretos = {}
+if File.exist?(".env")
+  File.readlines(".env").each do |linea|
+    clave, valor = linea.strip.split("=", 2)
+    secretos[clave] = valor if valor && !clave.start_with?("#")
+  end
+end
+
 Vagrant.configure("2") do |config|
   # 1. Evitar que vagrant-vbguest intente instalar headers antes del aprovisionamiento
   if Vagrant.has_plugin?("vagrant-vbguest")
     config.vbguest.auto_update = false
   end
 
-  # 2. Configuración global de VirtualBox para Arch Linux (DNS limpio y controlador estable)
+  # 2. Configuración global de VirtualBox (DNS limpio y controlador estable)
   config.vm.provider "virtualbox" do |vb|
     vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
     vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
@@ -21,11 +30,12 @@ Vagrant.configure("2") do |config|
     # eth1: WAN (Mismo 'intnet' que el externo)
     gw.vm.network "private_network", ip: "203.0.113.254", netmask: "255.255.255.0", virtualbox__intnet: "red_wan"
     # eth2: DMZ
-    gw.vm.network "private_network", ip: "172.1.#{N}.1", netmask: "255.255.255.0", virtualbox__intnet: "red_dmz" 
+    gw.vm.network "private_network", ip: "172.1.#{N}.1", netmask: "255.255.255.0", virtualbox__intnet: "red_dmz"
     # eth3: LAN de empleados
     gw.vm.network "private_network", ip: "172.2.#{N}.1", netmask: "255.255.255.0", virtualbox__intnet: "red_lan"
-    #eth4: LAN de gestion o intranet
+    # eth4: LAN de gestión o intranet
     gw.vm.network "private_network", ip: "172.3.#{N}.1", netmask: "255.255.255.0", virtualbox__intnet: "red_gestion"
+
     # Preparación de apt, needrestart y headers
     gw.vm.provision "shell", inline: <<-SHELL
       set -e
@@ -40,23 +50,23 @@ Vagrant.configure("2") do |config|
       DEBIAN_FRONTEND=noninteractive apt-get install -y linux-headers-generic build-essential dkms
     SHELL
 
-    gw.vm.provision "shell", path: "gw/provision.sh"   
+    gw.vm.provision "shell", path: "gw/provision.sh"
     gw.vm.provider "virtualbox" do |vb|
-        vb.name = "gw"
-        vb.gui = false
-        vb.memory = "768"
-        vb.cpus = 1
-        vb.linked_clone = true
-        vb.customize ["modifyvm", :id, "--groups", "/sad"]
+      vb.name = "gw"
+      vb.gui = false
+      vb.memory = "768"
+      vb.cpus = 1
+      vb.linked_clone = true
+      vb.customize ["modifyvm", :id, "--groups", "/sad"]
     end
-  end        
-  
-  # IDP en la LAN
+  end
+
+  # IDP en la LAN de gestión
   config.vm.define "idp" do |idp|
     idp.vm.box = "bento/ubuntu-24.04"
     idp.vm.hostname = "idp-#{iniciales}"
     idp.vm.network "private_network", ip: "172.3.#{N}.2", netmask: "255.255.255.0", virtualbox__intnet: "red_gestion"
-    
+
     idp.vm.provision "shell", inline: <<-SHELL
       if [ -f /etc/needrestart/needrestart.conf ]; then
         sed -i 's/#$nrconf{restart} = .*/$nrconf{restart} = "a";/' /etc/needrestart/needrestart.conf
@@ -66,21 +76,27 @@ Vagrant.configure("2") do |config|
       apt-get update -y
     SHELL
 
-    idp.vm.provision "shell", path: "idp/provision.sh"
+    idp.vm.provision "shell", path: "idp/provision.sh", env: {
+      "DOMINIO" => "#{iniciales.downcase}.internal",
+      "ORGANIZACION" => "Empresa #{iniciales}",
+      "LDAP_ADMIN_PASS" => secretos["LDAP_ADMIN_PASS"]
+    }
+
     # eliminar default gw en eth0 – red NAT creada por defecto
     idp.vm.provision "shell",
-        run: "always",
-        inline: "ip route del default && ip route add default via 172.3.#{N}.1"       
+      run: "always",
+      inline: "ip route replace default via 172.3.#{N}.1"
+
     idp.vm.provider "virtualbox" do |vb|
-        vb.name = "idp-intranet"
-        vb.gui = false
-        vb.memory = "512"
-        vb.cpus = 1
-        vb.linked_clone = true
-        vb.customize ["modifyvm", :id, "--groups", "/sad"]
+      vb.name = "idp-intranet"
+      vb.gui = false
+      vb.memory = "512"
+      vb.cpus = 1
+      vb.linked_clone = true
+      vb.customize ["modifyvm", :id, "--groups", "/sad"]
     end
   end
-  
+
   # Adminpc en la LAN
   config.vm.define "adminpc" do |adminpc|
     adminpc.vm.box = "bento/debian-13"
@@ -90,15 +106,15 @@ Vagrant.configure("2") do |config|
     adminpc.vm.provision "file", source: "adminpc/claves-ssh/clave_admin.pub", destination: "/tmp/id_ed25519.pub"
     adminpc.vm.provision "shell", path: "adminpc/provision.sh"
     adminpc.vm.provision "shell",
-        run: "always",
-        inline: "ip route replace default via 172.2.#{N}.1"   
+      run: "always",
+      inline: "ip route replace default via 172.2.#{N}.1"
     adminpc.vm.provider "virtualbox" do |vb|
-        vb.name = "adminpc-lan"
-        vb.gui = false
-        vb.memory = "400"
-        vb.cpus = 1
-        vb.linked_clone = true
-        vb.customize ["modifyvm", :id, "--groups", "/sad"]
+      vb.name = "adminpc-lan"
+      vb.gui = false
+      vb.memory = "400"
+      vb.cpus = 1
+      vb.linked_clone = true
+      vb.customize ["modifyvm", :id, "--groups", "/sad"]
     end
   end
 
@@ -108,26 +124,27 @@ Vagrant.configure("2") do |config|
     empleado.vm.hostname = "empleado-#{iniciales}"
     empleado.vm.network "private_network", ip: "172.2.#{N}.100", netmask: "255.255.255.0", virtualbox__intnet: "red_lan"
     empleado.vm.provision "shell", path: "empleado/provision.sh"
-    # eliminar default gw en eth0 – red NAT creada por defecto
+    empleado.vm.provision "shell", path: "comun/cliente-ldap.sh", args: ["empleado"]
+    # ruta por defecto por el gw y reinicio de SSSD
     empleado.vm.provision "shell",
-        run: "always",
-        inline: "ip route replace default via 172.2.#{N}.1; systemctl try-restart sssd || true"
+      run: "always",
+      inline: "ip route replace default via 172.2.#{N}.1; systemctl try-restart sssd || true"
     empleado.vm.provider "virtualbox" do |vb|
-        vb.name = "empleado-lan"
-        vb.gui = false
-        vb.memory = "400"
-        vb.cpus = 1
-        vb.linked_clone = true
-        vb.customize ["modifyvm", :id, "--groups", "/sad"]
+      vb.name = "empleado-lan"
+      vb.gui = false
+      vb.memory = "400"
+      vb.cpus = 1
+      vb.linked_clone = true
+      vb.customize ["modifyvm", :id, "--groups", "/sad"]
     end
   end
 
-  # proxy en DMZ
+  # Proxy en DMZ
   config.vm.define "proxy" do |proxy|
     proxy.vm.box = "bento/ubuntu-24.04"
     proxy.vm.hostname = "proxy-#{iniciales}"
-    proxy.vm.network "private_network", ip: "172.1.#{N}.2", netmask: "255.255.255.0", virtualbox__intnet: "red_dmz" 
-    
+    proxy.vm.network "private_network", ip: "172.1.#{N}.2", netmask: "255.255.255.0", virtualbox__intnet: "red_dmz"
+
     proxy.vm.provision "shell", inline: <<-SHELL
       if [ -f /etc/needrestart/needrestart.conf ]; then
         sed -i 's/#$nrconf{restart} = .*/$nrconf{restart} = "a";/' /etc/needrestart/needrestart.conf
@@ -140,15 +157,15 @@ Vagrant.configure("2") do |config|
     proxy.vm.provision "shell", path: "proxy/provision.sh"
     # eliminar default gw en eth0 – red NAT creada por defecto
     proxy.vm.provision "shell",
-        run: "always",
-        inline: "ip route del default && ip route add default via 172.1.#{N}.1"       
+      run: "always",
+      inline: "ip route replace default via 172.1.#{N}.1"
     proxy.vm.provider "virtualbox" do |vb|
-        vb.name = "proxy-dmz"
-        vb.gui = false
-        vb.memory = "1024"
-        vb.cpus = 1
-        vb.linked_clone = true
-        vb.customize ["modifyvm", :id, "--groups", "/sad"]
+      vb.name = "proxy-dmz"
+      vb.gui = false
+      vb.memory = "1024"
+      vb.cpus = 1
+      vb.linked_clone = true
+      vb.customize ["modifyvm", :id, "--groups", "/sad"]
     end
   end
 
@@ -156,20 +173,21 @@ Vagrant.configure("2") do |config|
   config.vm.define "www" do |www|
     www.vm.box = "bento/debian-13"
     www.vm.hostname = "www-#{iniciales}"
-    www.vm.network "private_network", ip: "172.1.#{N}.3", netmask: "255.255.255.0", virtualbox__intnet: "red_dmz" 
+    www.vm.network "private_network", ip: "172.1.#{N}.3", netmask: "255.255.255.0", virtualbox__intnet: "red_dmz"
     www.vm.provision "file", source: "adminpc/claves-ssh/clave_admin.pub", destination: "/tmp/id_ed25519.pub"
     www.vm.provision "shell", path: "www/provision.sh"
-    # eliminar default gw en eth0 – red NAT creada por defecto
+    www.vm.provision "shell", path: "comun/cliente-ldap.sh", args: ["www"]
+    # ruta por defecto por el gw y reinicio de SSSD
     www.vm.provision "shell",
-        run: "always",
-        inline: "ip route replace default via 172.1.#{N}.1; systemctl try-restart sssd || true"     
+      run: "always",
+      inline: "ip route replace default via 172.1.#{N}.1; systemctl try-restart sssd || true"
     www.vm.provider "virtualbox" do |vb|
-        vb.name = "www-dmz"
-        vb.gui = false
-        vb.memory = "400"
-        vb.cpus = 1
-        vb.linked_clone = true
-        vb.customize ["modifyvm", :id, "--groups", "/sad"]
+      vb.name = "www-dmz"
+      vb.gui = false
+      vb.memory = "400"
+      vb.cpus = 1
+      vb.linked_clone = true
+      vb.customize ["modifyvm", :id, "--groups", "/sad"]
     end
   end
 end

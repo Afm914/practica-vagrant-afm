@@ -95,4 +95,16 @@ interface eth0
 nogateway
 EOF
 
+echo "=> Acceso de los administradores de LDAP..."
+cat > /etc/ssh/sshd_config.d/10-ldap.conf <<'SSHD'
+AuthorizedKeysCommand /usr/bin/sss_ssh_authorizedkeys
+AuthorizedKeysCommandUser nobody
+SSHD
+
+echo "%admins ALL=(ALL:ALL) ALL" > /etc/sudoers.d/admins
+chmod 440 /etc/sudoers.d/admins
+visudo -c
+sshd -t
+systemctl restart ssh
+
 echo "------ FIN ------"
