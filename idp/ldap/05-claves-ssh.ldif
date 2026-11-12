@@ -1,0 +1,7 @@
+dn: uid=alex.fm,ou=usuarios,dc=afm,dc=internal
+changetype: modify
+add: objectClass
+objectClass: ldapPublicKey
+-
+add: sshPublicKey
+sshPublicKey: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDmRRI+b34oKJGWpkuT9q859Msew0dnXpQ6jT2vEPbjX admin_alex@adminpc
